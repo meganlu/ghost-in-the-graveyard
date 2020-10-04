@@ -7,7 +7,7 @@ Noose = Class{}
 local NOOSE_IMAGE = love.graphics.newImage('images/noose.png')
 
 -- scroll speed: same as foreground
-local NOOSE_SCROLL = -60
+local NOOSE_SCROLL = -80
 
 function Noose:init()
     self.x = VIRTUAL_WIDTH
@@ -15,6 +15,7 @@ function Noose:init()
     self.y = 0
 
     self.width = NOOSE_IMAGE:getWidth()
+    self.height = NOOSE_IMAGE:getHeight()
 end
 
 function Noose:update(dt)

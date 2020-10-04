@@ -9,7 +9,9 @@ push = require 'push'
 Class = require 'class'
 require 'Ghost'
 require 'Noose'
-
+require 'Grave'
+require 'Pond'
+require 'Skull'
 
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
@@ -33,9 +35,9 @@ local foreground = love.graphics.newImage('images/foreground.png')
 local foregroundScroll = 0
 
 -- speed at which we should scroll our images, scaled by dt
-local BACKGROUND_SCROLL_SPEED = 15
-local MIDGROUND_SCROLL_SPEED = 30
-local FOREGROUND_SCROLL_SPEED = 60
+local BACKGROUND_SCROLL_SPEED = 20
+local MIDGROUND_SCROLL_SPEED = 40
+local FOREGROUND_SCROLL_SPEED = 80
 
 -- point at which we should loop our background back to X 0
 local BACKGROUND_LOOPING_POINT = 864
@@ -43,18 +45,27 @@ local BACKGROUND_LOOPING_POINT = 864
 -- ghost sprite
 local ghost = Ghost()
 
--- table of spawning nooses
+-- tables 
 local nooses = {}
+local graves = {}
+local ponds = {}
+local skulls = {}
 
--- timer for spawning nooses
-local spawnTimer = 0
+-- timer for spawning sprites
+local nooseTimer = 0
+local graveTimer = 0
+local pondTimer = 0
+local skullTimer = 0
+
+-- scrolling variable to pause the game 
+local scrolling = true
 
 function love.load()
 	-- initialize our nearest-neighbor filter
     love.graphics.setDefaultFilter('nearest', 'nearest')
     
     -- app window title
-    love.window.setTitle('Ghost in the Graveyard')
+    love.window.setTitle('Ghost in a Graveyard')
 
     -- initialize fonts
 
@@ -103,37 +114,108 @@ end
 
 
 function love.update(dt)
-    -- seed the RNG
-    math.randomseed(os.time())
+    if scrolling then   
+        -- seed the RNG
+        math.randomseed(os.time())
+        math.random();math.random();math.random()
 
-	-- scroll = how much we've scrolled since the last "repeat"
-	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) 
-		% BACKGROUND_LOOPING_POINT
+    	-- scroll = how much we've scrolled since the last "repeat"
+    	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) 
+    		% BACKGROUND_LOOPING_POINT
 
-	midgroundScroll = (midgroundScroll + MIDGROUND_SCROLL_SPEED * dt) 
-        % BACKGROUND_LOOPING_POINT
+    	midgroundScroll = (midgroundScroll + MIDGROUND_SCROLL_SPEED * dt) 
+            % BACKGROUND_LOOPING_POINT
 
-	foregroundScroll = (foregroundScroll + FOREGROUND_SCROLL_SPEED * dt) 
-        % BACKGROUND_LOOPING_POINT
+    	foregroundScroll = (foregroundScroll + FOREGROUND_SCROLL_SPEED * dt) 
+            % BACKGROUND_LOOPING_POINT
 
-    spawnTimer = spawnTimer + dt
-    -- spawn a new noose after a random amount of time
-    math.random();math.random();math.random()
-    if spawnTimer > math.random(10,40) then
-        table.insert(nooses, Noose())
-        spawnTimer = 0
-    end
-	
-	--update ghost position
-    ghost:update(dt)
-	
-    -- for every noose in the scene...
-    for k, noose in pairs(nooses) do
-        noose:update(dt)
+        --update ghost position
+        ghost:update(dt)
 
-        -- if noose is no longer visible past left edge, remove it from scene
-        if noose.x < -noose.width then
-            table.remove(nooses, k)
+        -- spawn a new noose after a random amount of time
+        nooseTimer = nooseTimer + dt
+        if nooseTimer > math.random(10,50) then
+            table.insert(nooses, Noose())
+            nooseTimer = 0
+        end
+
+        -- spawn a new grave after a random amount of time
+        graveTimer = graveTimer + dt
+        if graveTimer > math.random(10,50) then
+            table.insert(graves, Grave())
+            graveTimer = 0
+        end
+
+        -- spawn a new pond after a random amount of time
+        pondTimer = pondTimer + dt
+        if pondTimer > math.random(10,30) then
+            table.insert(ponds, Pond())
+            pondTimer = 0
+        end
+
+         -- spawn a new pond after a random amount of time
+        skullTimer = skullTimer + dt
+        if skullTimer > math.random(5,20) then
+            table.insert(skulls, Skull())
+            skullTimer = 0
+        end
+        
+    	
+        -- update noose table.
+        for k, noose in pairs(nooses) do
+            noose:update(dt)
+
+            if ghost:collidesnoose(noose) then
+            -- pause the game to show collision
+                scrolling = false
+            end
+
+            -- if noose is no longer visible past left edge, remove it from scene
+            if noose.x < -noose.width then
+                table.remove(nooses, k)
+            end
+        end
+
+        -- update grave table
+        for k, grave in pairs(graves) do
+            grave:update(dt)
+
+            if ghost:collidesgrave(grave) then
+            -- pause the game to show collision
+                scrolling = false 
+            end
+            -- if grave is no longer visible past left edge, remove it from scene
+            if grave.x < -grave.width then
+                table.remove(graves, k)
+            end
+        end
+
+        -- update ponds table
+        for k, pond in pairs(ponds) do
+            pond:update(dt)
+
+            if ghost:collidesgrave(pond) then
+            -- pause the game to show collision
+                scrolling = false 
+            end
+            -- if grave is no longer visible past left edge, remove it from scene
+            if pond.x < -pond.width then
+                table.remove(ponds, k)
+            end
+        end
+
+        -- update skulls table
+        for k, skull in pairs(skulls) do
+            skull:update(dt)
+
+            if ghost:collidesskull(skull) then
+            -- pause the game to show collision
+                scrolling = false 
+            end
+            -- if grave is no longer visible past left edge, remove it from scene
+            if skull.x < -skull.width then
+                table.remove(skulls, k)
+            end
         end
     end
 
@@ -154,6 +236,21 @@ function love.draw()
      -- render all the nooses 
     for k, noose in pairs(nooses) do
         noose:render()
+    end
+
+     -- render all the graves
+    for k, grave in pairs(graves) do
+        grave:render()
+    end
+
+    -- render all the ponds
+    for k, pond in pairs(ponds) do
+        pond:render()
+    end
+
+    -- render all the skulls
+    for k, skull in pairs(skulls) do
+        skull:render()
     end
 
      -- render our ghost to the screen using its own render logic
