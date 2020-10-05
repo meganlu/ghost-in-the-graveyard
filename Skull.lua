@@ -7,7 +7,7 @@ Skull = Class{}
 local SKULL_IMAGE = love.graphics.newImage('images/skull.png')
 
 -- scroll speed: same as foreground
-local SKULL_SCROLL = -80
+local SKULL_SCROLL = -100
 
 
 function Skull:init()
@@ -16,6 +16,8 @@ function Skull:init()
     self.y = VIRTUAL_HEIGHT - SKULL_IMAGE:getHeight() - 10
     
     self.width = SKULL_IMAGE:getWidth()
+
+    self.collected = false
 end
 
 function Skull:update(dt)

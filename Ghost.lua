@@ -26,9 +26,9 @@ end
 function Ghost:collidesnoose(noose)
     --if the right edge of ghost > left edge of noose AND 
     --the left edge of ghost < right edge of noose THEN
-    if  (self.x + 60) >= (noose.x + 60) and self.x <= (noose.x + 75) then
-        --if the top edge of ghost < bottom edge of noose 
-        if (self.y + 5) <= noose.height - 5 then
+    if  (self.x + 60) >= (noose.x + 60) and (self.x + 10) <= (noose.x + 75) then
+        --if the top edge of ghost < bottom edge of noose and bottom edge of ghost > top of noose
+        if (self.y + 5) <= (noose.y + 250) and (self.y + 50) >= (noose.y + 110)then
             return true
         end
     end
@@ -38,21 +38,36 @@ end
 function Ghost:collidesgrave(grave)
     --if the right edge of ghost > left edge of grave AND 
     --the left edge of ghost < right edge of grave THEN
+    --[[
     if  (self.x + 60) >= (grave.x + 30) and self.x <= (grave.x + 140) then
         --if the bottom edge of ghost > top edge of grave 
         if (self.y + 70) >= grave.y + 20 then
             return true
         end
     end
+    ]]
+
+    --section one
+    if (self.x + 60) >= (grave.x + 30) and (self.x + 10) <= (grave.x + 105) then
+        if (self.y + 55) >= (grave.y + 30) and (self.y + 5) <= (grave.y + 105) then
+            return true
+        end
+    --section two
+    elseif (self.x + 60) >= (grave.x + 70) and (self.x + 10) <= (grave.x + 150) then
+        if (self.y + 55) >= (grave.y + 80) then
+            return true
+        end
+    end
+
     return false
 end
 
 function Ghost:collidespond(pond)
     --if the right edge of ghost > left edge of pond AND 
     --the left edge of ghost < right edge of pond THEN
-    if  (self.x + 60) >= (pond.x + 10) and self.x <= pond.width then
+    if(self.x + 55) >= (pond.x + 10) and (self.x + 10) <= (pond.x + 350) then
         --if the bottom edge of ghost > top edge of pond
-        if (self.y + 70) >= pond.y + 20 then
+        if (self.y + 50) >= (pond.y + 20) and (self.y + 5) <= (pond.y + 40) then
             return true
         end
     end
@@ -62,9 +77,9 @@ end
 function Ghost:collidesskull(skull)
     --if the right edge of ghost > left edge of skull AND 
     --the left edge of ghost < right edge of skull THEN
-    if  (self.x + 60) >= (skull.x + 20) and self.x <= skull.width - 10 then
-        --if the bottom edge of ghost > top edge of skull
-        if (self.y + 70) >= skull.y + 10 then
+    if  (self.x + 60) >= (skull.x + 15) and (self.x + 10) <= (skull.x + 65) then
+        --if the bottom edge of ghost > top edge of skull and top edge of ghost < bottom edge of skull
+        if (self.y + 60) >= (skull.y + 5) and (self.y + 5) <= (skull.y + 55) then
             return true
         end
     end

@@ -13,6 +13,13 @@ require 'Grave'
 require 'Pond'
 require 'Skull'
 
+--require all statemachine classes
+require 'StateMachine'
+require 'states/BaseState'
+require 'states/PlayState'
+require 'states/ScoreState'
+require 'states/TitleScreenState'
+
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
@@ -37,25 +44,10 @@ local foregroundScroll = 0
 -- speed at which we should scroll our images, scaled by dt
 local BACKGROUND_SCROLL_SPEED = 20
 local MIDGROUND_SCROLL_SPEED = 40
-local FOREGROUND_SCROLL_SPEED = 80
+local FOREGROUND_SCROLL_SPEED = 100
 
 -- point at which we should loop our background back to X 0
 local BACKGROUND_LOOPING_POINT = 864
-
--- ghost sprite
-local ghost = Ghost()
-
--- tables 
-local nooses = {}
-local graves = {}
-local ponds = {}
-local skulls = {}
-
--- timer for spawning sprites
-local nooseTimer = 0
-local graveTimer = 0
-local pondTimer = 0
-local skullTimer = 0
 
 -- scrolling variable to pause the game 
 local scrolling = true
@@ -67,11 +59,9 @@ function love.load()
     -- app window title
     love.window.setTitle('Ghost in a Graveyard')
 
-    -- initialize fonts
-
-    -- initialize sounds
-
-    -- start music
+    scoreFont = love.graphics.newFont('bigFont.ttf', 50)
+    bigFont = love.graphics.newFont('bigFont.ttf', 90)
+    readFont = love.graphics.newFont('smallFont.ttf', 40)
 
     -- initialize our virtual resolution
     push:setupScreen(VIRTUAL_WIDTH, VIRTUAL_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, {
@@ -80,7 +70,43 @@ function love.load()
         resizable = true
     })
 
+     -- initialize sounds
+    sounds = {
+        --['dive'] = love.audio.newSource('dive.wav', 'static'),
+        ['collect'] = love.audio.newSource('sounds/collect.wav', 'static'),
+        ['rope'] = love.audio.newSource('sounds/rope.wav', 'static'),
+        ['scream'] = love.audio.newSource('sounds/scream.wav', 'static'),
+        ['caw'] = love.audio.newSource('sounds/caw.wav', 'static'),
+        ['splash'] = love.audio.newSource('sounds/splash.wav', 'static'),
+        ['wind'] = love.audio.newSource('sounds/wind.wav', 'static'),
+
+        ['music'] = love.audio.newSource('sounds/music.wav', 'static'),
+        ['forest'] = love.audio.newSource('sounds/forest.wav', 'static')
+    }
+
+    sounds['wind']:setVolume(0.1)
+    sounds['music']:setVolume(0.4)
+    sounds['forest']:setVolume(0.5)
+    sounds['scream']:setVolume(0.6)
+    sounds['caw']:setVolume(0.6)
+    sounds['rope']:setVolume(0.4)
+    sounds['collect']:setVolume(0.8)
+
+
+    -- kick off music
+    sounds['music']:setLooping(true)
+    sounds['music']:play()
+    sounds['forest']:setLooping(true)
+    sounds['forest']:play()
+
+
     -- initialize state machine with all state-returning functions
+    gStateMachine = StateMachine {
+        ['title'] = function() return TitleScreenState() end,
+        ['play'] = function() return PlayState() end,
+        ['score'] = function() return ScoreState() end
+    }
+    gStateMachine:change('title')
 
     -- initialize input table
     love.keyboard.keysPressed = {}
@@ -101,24 +127,12 @@ function love.keypressed(key)
     end
 end
 
-
---[[
-    Custom function to extend LÖVE's input handling; returns whether a given
-    key was set to true in our input table this frame.
-]]
-
 function love.keyboard.wasPressed(key)
     return love.keyboard.keysPressed[key]
 end
 
-
-
 function love.update(dt)
     if scrolling then   
-        -- seed the RNG
-        math.randomseed(os.time())
-        math.random();math.random();math.random()
-
     	-- scroll = how much we've scrolled since the last "repeat"
     	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) 
     		% BACKGROUND_LOOPING_POINT
@@ -129,94 +143,10 @@ function love.update(dt)
     	foregroundScroll = (foregroundScroll + FOREGROUND_SCROLL_SPEED * dt) 
             % BACKGROUND_LOOPING_POINT
 
-        --update ghost position
-        ghost:update(dt)
+        -- update the state machine
+        gStateMachine:update(dt)
 
-        -- spawn a new noose after a random amount of time
-        nooseTimer = nooseTimer + dt
-        if nooseTimer > math.random(10,50) then
-            table.insert(nooses, Noose())
-            nooseTimer = 0
-        end
-
-        -- spawn a new grave after a random amount of time
-        graveTimer = graveTimer + dt
-        if graveTimer > math.random(10,50) then
-            table.insert(graves, Grave())
-            graveTimer = 0
-        end
-
-        -- spawn a new pond after a random amount of time
-        pondTimer = pondTimer + dt
-        if pondTimer > math.random(10,30) then
-            table.insert(ponds, Pond())
-            pondTimer = 0
-        end
-
-         -- spawn a new pond after a random amount of time
-        skullTimer = skullTimer + dt
-        if skullTimer > math.random(5,20) then
-            table.insert(skulls, Skull())
-            skullTimer = 0
-        end
         
-    	
-        -- update noose table.
-        for k, noose in pairs(nooses) do
-            noose:update(dt)
-
-            if ghost:collidesnoose(noose) then
-            -- pause the game to show collision
-                scrolling = false
-            end
-
-            -- if noose is no longer visible past left edge, remove it from scene
-            if noose.x < -noose.width then
-                table.remove(nooses, k)
-            end
-        end
-
-        -- update grave table
-        for k, grave in pairs(graves) do
-            grave:update(dt)
-
-            if ghost:collidesgrave(grave) then
-            -- pause the game to show collision
-                scrolling = false 
-            end
-            -- if grave is no longer visible past left edge, remove it from scene
-            if grave.x < -grave.width then
-                table.remove(graves, k)
-            end
-        end
-
-        -- update ponds table
-        for k, pond in pairs(ponds) do
-            pond:update(dt)
-
-            if ghost:collidesgrave(pond) then
-            -- pause the game to show collision
-                scrolling = false 
-            end
-            -- if grave is no longer visible past left edge, remove it from scene
-            if pond.x < -pond.width then
-                table.remove(ponds, k)
-            end
-        end
-
-        -- update skulls table
-        for k, skull in pairs(skulls) do
-            skull:update(dt)
-
-            if ghost:collidesskull(skull) then
-            -- pause the game to show collision
-                scrolling = false 
-            end
-            -- if grave is no longer visible past left edge, remove it from scene
-            if skull.x < -skull.width then
-                table.remove(skulls, k)
-            end
-        end
     end
 
 	--reset input table
@@ -233,28 +163,7 @@ function love.draw()
     love.graphics.draw(midground, -midgroundScroll, 0)
     love.graphics.draw(foreground, -foregroundScroll, 0)
 
-     -- render all the nooses 
-    for k, noose in pairs(nooses) do
-        noose:render()
-    end
-
-     -- render all the graves
-    for k, grave in pairs(graves) do
-        grave:render()
-    end
-
-    -- render all the ponds
-    for k, pond in pairs(ponds) do
-        pond:render()
-    end
-
-    -- render all the skulls
-    for k, skull in pairs(skulls) do
-        skull:render()
-    end
-
-     -- render our ghost to the screen using its own render logic
-    ghost:render()
+    gStateMachine:render()
 
     push:finish()
 end

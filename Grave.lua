@@ -7,7 +7,7 @@ Grave = Class{}
 local GRAVE_IMAGE = love.graphics.newImage('images/grave.png')
 
 -- scroll speed: same as foreground
-local GRAVE_SCROLL = -80
+local GRAVE_SCROLL = -100
 
 function Grave:init()
     self.x = VIRTUAL_WIDTH

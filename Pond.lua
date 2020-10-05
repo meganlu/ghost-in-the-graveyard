@@ -7,7 +7,7 @@ Pond = Class{}
 local POND_IMAGE = love.graphics.newImage('images/pond.png')
 
 -- scroll speed: same as foreground
-local POND_SCROLL = -80
+local POND_SCROLL = -100
 
 function Pond:init()
     self.x = VIRTUAL_WIDTH
