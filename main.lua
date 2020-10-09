@@ -12,6 +12,7 @@ require 'Noose'
 require 'Grave'
 require 'Pond'
 require 'Skull'
+require 'Spider'
 
 --require all statemachine classes
 require 'StateMachine'
@@ -19,6 +20,8 @@ require 'states/BaseState'
 require 'states/PlayState'
 require 'states/ScoreState'
 require 'states/TitleScreenState'
+require 'states/InfoState'
+require 'states/CountdownState'
 
 -- physical screen dimensions
 WINDOW_WIDTH = 1280
@@ -60,7 +63,7 @@ function love.load()
     love.window.setTitle('Ghost in a Graveyard')
 
     scoreFont = love.graphics.newFont('bigFont.ttf', 50)
-    bigFont = love.graphics.newFont('bigFont.ttf', 90)
+    bigFont = love.graphics.newFont('bigFont.ttf', 100)
     readFont = love.graphics.newFont('smallFont.ttf', 40)
 
     -- initialize our virtual resolution
@@ -84,7 +87,7 @@ function love.load()
         ['forest'] = love.audio.newSource('sounds/forest.wav', 'static')
     }
 
-    sounds['wind']:setVolume(0.1)
+    sounds['wind']:setVolume(0.2)
     sounds['music']:setVolume(0.4)
     sounds['forest']:setVolume(0.5)
     sounds['scream']:setVolume(0.6)
@@ -103,6 +106,8 @@ function love.load()
     -- initialize state machine with all state-returning functions
     gStateMachine = StateMachine {
         ['title'] = function() return TitleScreenState() end,
+        ['info'] = function() return InfoState() end,
+        ['countdown'] = function() return CountdownState() end,
         ['play'] = function() return PlayState() end,
         ['score'] = function() return ScoreState() end
     }
@@ -110,6 +115,12 @@ function love.load()
 
     -- initialize input table
     love.keyboard.keysPressed = {}
+
+     -- initialize mouse input table
+    love.mouse.buttonsPressed = {}
+    -- mouse input location
+    love.mouse.x = 0
+    love.mouse.y = 0
 end
 
 
@@ -119,7 +130,6 @@ end
 
 
 function love.keypressed(key)
-    -- add to our table of keys pressed this frame
     love.keyboard.keysPressed[key] = true
 
     if key == 'escape' then
@@ -130,6 +140,29 @@ end
 function love.keyboard.wasPressed(key)
     return love.keyboard.keysPressed[key]
 end
+
+function love.mousepressed(x, y, button)
+    love.mouse.buttonsPressed[button] = true
+    love.mouse.x = x
+    love.mouse.y = y
+end
+
+function love.mousereleased( x, y, button)
+    love.mouse.buttonsPressed[button] = false
+end
+
+function love.mouse.wasPressed(button)
+    return love.mouse.buttonsPressed[button]
+end
+
+function love.mouse.getX()
+    return love.mouse.x
+end
+
+function love.mouse.getY()
+    return love.mouse.y
+end
+
 
 function love.update(dt)
     if scrolling then   

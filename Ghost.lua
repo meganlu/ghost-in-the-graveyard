@@ -28,7 +28,7 @@ function Ghost:collidesnoose(noose)
     --the left edge of ghost < right edge of noose THEN
     if  (self.x + 60) >= (noose.x + 60) and (self.x + 10) <= (noose.x + 75) then
         --if the top edge of ghost < bottom edge of noose and bottom edge of ghost > top of noose
-        if (self.y + 5) <= (noose.y + 250) and (self.y + 50) >= (noose.y + 110)then
+        if (self.y + 5) <= (noose.y + 360) and (self.y + 50) >= (noose.y + 190)then
             return true
         end
     end
@@ -36,17 +36,6 @@ function Ghost:collidesnoose(noose)
 end
 
 function Ghost:collidesgrave(grave)
-    --if the right edge of ghost > left edge of grave AND 
-    --the left edge of ghost < right edge of grave THEN
-    --[[
-    if  (self.x + 60) >= (grave.x + 30) and self.x <= (grave.x + 140) then
-        --if the bottom edge of ghost > top edge of grave 
-        if (self.y + 70) >= grave.y + 20 then
-            return true
-        end
-    end
-    ]]
-
     --section one
     if (self.x + 60) >= (grave.x + 30) and (self.x + 10) <= (grave.x + 105) then
         if (self.y + 55) >= (grave.y + 30) and (self.y + 5) <= (grave.y + 105) then
@@ -80,6 +69,18 @@ function Ghost:collidesskull(skull)
     if  (self.x + 60) >= (skull.x + 15) and (self.x + 10) <= (skull.x + 65) then
         --if the bottom edge of ghost > top edge of skull and top edge of ghost < bottom edge of skull
         if (self.y + 60) >= (skull.y + 5) and (self.y + 5) <= (skull.y + 55) then
+            return true
+        end
+    end
+    return false
+end
+
+function Ghost:collidesspider(spider)
+    --if the right edge of ghost > left edge of spider AND 
+    --the left edge of ghost < right edge of spider THEN
+    if  (self.x + 60) >= (spider.x + 20) and (self.x + 10) <= (spider.x + 40) then
+        --if the bottom edge of ghost > top edge of spider and top edge of ghost < bottom edge of spider
+        if (self.y + 60) >= (spider.y + 268) and (self.y + 5) <= (spider.y + 288) then
             return true
         end
     end

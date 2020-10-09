@@ -16,12 +16,14 @@ function PlayState:init()
     self.graves = {}
     self.ponds = {}
     self.skulls = {}
+    self.spiders = {}
     
     -- timers for spawning sprites
     self.nooseTimer = 0
     self.graveTimer = 0
     self.pondTimer = 0
     self.skullTimer = 0
+    self.spiderTimer = 0
 
     -- reason for death
     self.death = ""
@@ -60,11 +62,16 @@ function PlayState:update(dt)
 
      -- spawn a new skull after a random amount of time
     self.skullTimer = self.skullTimer + dt
-    if self.skullTimer > math.random(3,10) then
+    if self.skullTimer > math.random(5,15) then
         table.insert(self.skulls, Skull())
         self.skullTimer = 0
     end
     
+    self.spiderTimer = self.spiderTimer + dt
+    if self.spiderTimer > math.random(5,15) then
+        table.insert(self.spiders, Spider())
+        self.spiderTimer = 0
+    end
     
     -- update noose table.
     for k, noose in pairs(self.nooses) do
@@ -138,14 +145,33 @@ function PlayState:update(dt)
 
         if self.ghost:collidesskull(skull) then
             if not skull.collected then
+                sounds['collect']:stop()
                 sounds['collect']:play()
-                self.score = self.score + 10
+                self.score = self.score + 11
                 skull.collected = true
             end
         end
         -- if skull is no longer visible past left edge, remove it from scene
         if skull.x < -skull.width then
             table.remove(self.skulls, k)
+        end
+    end
+
+    -- update self.spiders table
+    for k, spider in pairs(self.spiders) do
+        spider:update(dt)
+
+        if self.ghost:collidesspider(spider) then
+            if not spider.collected then
+                sounds['collect']:stop()
+                sounds['collect']:play()
+                self.score = self.score + 7
+                spider.collected = true
+            end
+        end
+        -- if spider is no longer visible past left edge, remove it from scene
+        if spider.x < -spider.width then
+            table.remove(self.spiders, k)
         end
     end
 
@@ -198,9 +224,17 @@ function PlayState:render()
         skull:render()
     end
 
-    love.graphics.setFont(scoreFont)
-    love.graphics.print('Score: ' .. tostring(self.score), 20, 10)
+    -- render all the self.skulls
+    for k, spider in pairs(self.spiders) do
+        spider:render()
+    end
+
 
      -- render our ghost to the screen using its own render logic
     self.ghost:render()
+    
+    love.graphics.setColor(202, 223, 224, 255)
+    love.graphics.setFont(scoreFont)
+    love.graphics.print('Score: ' .. tostring(self.score), 20, 10)
+
 end

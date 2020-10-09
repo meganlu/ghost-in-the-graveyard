@@ -12,7 +12,7 @@ local NOOSE_SCROLL = -100
 function Noose:init()
     self.x = VIRTUAL_WIDTH
 
-    self.y = 0
+    self.y = math.random(-140, 0)
 
     self.width = NOOSE_IMAGE:getWidth()
     self.height = NOOSE_IMAGE:getHeight()
