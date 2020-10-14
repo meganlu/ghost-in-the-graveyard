@@ -14,6 +14,7 @@ function InfoState:update(dt)
     if love.mouse.wasPressed(1) then
         if love.mouse.getX() >= 50 and love.mouse.getX() <= 110 then
             if love.mouse.getY() >= 60 and love.mouse.getY() <= 120 then
+               sounds['click']:play()
                gStateMachine:change('title')
             end
         end

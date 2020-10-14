@@ -15,6 +15,7 @@ function TitleScreenState:update(dt)
     if love.mouse.wasPressed(1) then
         if love.mouse.getX() >= 730 and love.mouse.getX() <= 930 then
             if love.mouse.getY() >= 210 and love.mouse.getY() <= 280 then
+                sounds['click']:play()
                 gStateMachine:change('countdown')
                 sounds['music']:stop()
                 sounds['wind']:setLooping(true)
@@ -28,6 +29,7 @@ function TitleScreenState:update(dt)
     if love.mouse.wasPressed(1) then
         if love.mouse.getX() >= 730 and love.mouse.getX() <= 930 then
             if love.mouse.getY() >= 330 and love.mouse.getY() <= 400 then
+               sounds['click']:play()
                gStateMachine:change('info')
             end
         end

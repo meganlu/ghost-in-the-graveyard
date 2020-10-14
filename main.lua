@@ -53,7 +53,7 @@ local FOREGROUND_SCROLL_SPEED = 100
 local BACKGROUND_LOOPING_POINT = 864
 
 -- scrolling variable to pause the game 
-local scrolling = true
+SCROLLING = true
 
 function love.load()
 	-- initialize our nearest-neighbor filter
@@ -75,13 +75,13 @@ function love.load()
 
      -- initialize sounds
     sounds = {
-        --['dive'] = love.audio.newSource('dive.wav', 'static'),
         ['collect'] = love.audio.newSource('sounds/collect.wav', 'static'),
         ['rope'] = love.audio.newSource('sounds/rope.wav', 'static'),
         ['scream'] = love.audio.newSource('sounds/scream.wav', 'static'),
         ['caw'] = love.audio.newSource('sounds/caw.wav', 'static'),
         ['splash'] = love.audio.newSource('sounds/splash.wav', 'static'),
         ['wind'] = love.audio.newSource('sounds/wind.wav', 'static'),
+        ['click'] = love.audio.newSource('sounds/click.wav', 'static'),
 
         ['music'] = love.audio.newSource('sounds/music.wav', 'static'),
         ['forest'] = love.audio.newSource('sounds/forest.wav', 'static')
@@ -94,7 +94,7 @@ function love.load()
     sounds['caw']:setVolume(0.6)
     sounds['rope']:setVolume(0.4)
     sounds['collect']:setVolume(0.8)
-
+    sounds['click']:setVolume(0.5)
 
     -- kick off music
     sounds['music']:setLooping(true)
@@ -165,7 +165,7 @@ end
 
 
 function love.update(dt)
-    if scrolling then   
+    if SCROLLING then   
     	-- scroll = how much we've scrolled since the last "repeat"
     	backgroundScroll = (backgroundScroll + BACKGROUND_SCROLL_SPEED * dt) 
     		% BACKGROUND_LOOPING_POINT
@@ -175,15 +175,14 @@ function love.update(dt)
 
     	foregroundScroll = (foregroundScroll + FOREGROUND_SCROLL_SPEED * dt) 
             % BACKGROUND_LOOPING_POINT
-
-        -- update the state machine
-        gStateMachine:update(dt)
-
-        
     end
+    -- update the state machine
+    gStateMachine:update(dt)
+
 
 	--reset input table
 	love.keyboard.keysPressed = {}
+    love.mouse.buttonsPressed = {}
 end
 
 

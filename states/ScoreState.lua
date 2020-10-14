@@ -22,7 +22,11 @@ function ScoreState:update(dt)
     if love.mouse.wasPressed(1) then
         if love.mouse.getX() >= 370 and love.mouse.getX() <= 570 then
             if love.mouse.getY() >= 485 and love.mouse.getY() <= 555 then
+                sounds['click']:play()
                 gStateMachine:change('countdown')
+                sounds['rope']:stop()
+                sounds['splash']:stop()
+                sounds['caw']:stop()
                 sounds['music']:stop()
                 sounds['wind']:setLooping(true)
                 sounds['wind']:play()
@@ -36,6 +40,7 @@ function ScoreState:update(dt)
     if love.mouse.wasPressed(1) then
         if love.mouse.getX() >= 640 and love.mouse.getX() <= 840 then
             if love.mouse.getY() >= 485 and love.mouse.getY() <= 555 then
+                sounds['click']:play()
                 sounds['rope']:stop()
                 sounds['music']:play()
                 gStateMachine:change('title')
@@ -50,6 +55,7 @@ function ScoreState:update(dt)
         sounds['splash']:stop()
         sounds['caw']:stop()
         sounds['music']:stop()
+        sounds['wind']:setLooping(true)
         sounds['wind']:play()
         sounds['forest']:setVolume(1)
         gStateMachine:change('countdown')
